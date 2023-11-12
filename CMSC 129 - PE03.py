@@ -8,12 +8,14 @@ import os
 
 parser = tk.Tk()
 parser.title('Non-Recursive Predictive Parsing')
-parser.geometry('800x600')
+parser.geometry('1200x400')
 parser.configure(bg='#E6E6EA')
 
 # Variable initiation
 prod_table = None
 parse_table= None
+frame1 = None
+frame2 = None
 
 # Create a StringVar for the status label
 status_var = tk.StringVar()
@@ -23,11 +25,26 @@ status_var.set("STATUS: No file loaded.")
 input_filename = ""
 input_directory = ""
 
+def create_frames():
+    global frame1, frame2
+
+    frame1 = tk.Frame(parser, borderwidth=2, relief="solid")
+    frame1.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
+
+    label1 = tk.Label(frame1, text="Parse Table", font=("Helvetica", 12))
+    label1.grid(row=0, column=0)
+
+    frame2 = tk.Frame(parser, borderwidth=2, relief="solid")
+    frame2.grid(row=0, column=1, padx=10, pady=10, sticky="nsew")
+
+    label2 = tk.Label(frame2, text="Productions", font=("Helvetica", 12))
+    label2.grid(row=0, column=0)
+
 def select_file():
     global input_filename, input_directory, prod_table, parse_table
     error_count = 0  # Reset error_count to 0
     filetypes = (
-        ('.prod files', '*.prod'),
+        ('.prod files', '*.prod'),  
         ('.ptbl files', '*.ptbl')
     )
     filename = fd.askopenfilename(
@@ -67,12 +84,12 @@ def load_prod_table(file_path):
 # Function to display .prod table
 def display_prod_table(file_path):
     if prod_table is not None:
-        # Create a frame inside the main window
-        prod_frame = ttk.Frame(parser)
-        prod_frame.grid(row=6, column=0, columnspan=2, padx=10, pady=10)
+        # # Create a frame inside the main window
+        # prod_frame = ttk.Frame(parser)
+        # prod_frame.grid(row=6, column=0, columnspan=2, padx=10, pady=10)
 
         # Create a Treeview widget for .prod table
-        prod_tree = ttk.Treeview(prod_frame, columns=tuple(range(len(prod_table[0]))), show="headings")
+        prod_tree = ttk.Treeview(frame1, columns=tuple(range(len(prod_table[0]))), show="headings")
 
         # Use the first row from the .prod table as column headings
         for i, heading_text in enumerate(prod_table[0]):
@@ -101,11 +118,11 @@ def load_parse_table(file_path):
 def display_parse_table(parse_table):
     if parse_table is not None:
         # Create a frame inside the main window
-        table_frame = ttk.Frame(parser)
-        table_frame.grid(row=8, column=0, columnspan=5, padx=10, pady=10)
+        # table_frame = ttk.Frame(parser)
+        # table_frame.grid(row=8, column=0, columnspan=5, padx=10, pady=10)
 
         # Create a Treeview widget
-        tree = ttk.Treeview(table_frame, columns=tuple(range(len(parse_table[0]))), show="headings")
+        tree = ttk.Treeview(frame2, columns=tuple(range(len(parse_table[0]))), show="headings")
 
         # Use the first row from the parse table as column headings
         for i, heading_text in enumerate(parse_table[0]):
@@ -131,5 +148,13 @@ button1.grid(row=3, column=0, padx=0, pady=10, sticky="e")
 # Label for status
 status_label = tk.Label(parser, textvariable=status_var, font=('times new roman', 12))
 status_label.grid(row=2, column=0, columnspan=5, padx=20, pady=5, sticky="w")
+
+# Configure rows and columns to expand with the window
+parser.columnconfigure(0, weight=1)
+parser.columnconfigure(1, weight=1)
+parser.rowconfigure(0, weight=1)
+
+# Create frames and labels
+create_frames()
 
 parser.mainloop()
