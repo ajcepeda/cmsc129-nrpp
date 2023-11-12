@@ -77,12 +77,12 @@ def load_prod_table(file_path):
                 # Treat commas as delimiters in the CSV file
                 row = line.strip().split(',')
                 prod_table.append(row)
+        # Update status label
+        status_var.set(f"LOADED: '{os.path.basename(input_filename)}'")
         return prod_table
     except Exception as e:
         print(f"Error loading parse table: {e}")
         return None
-    # Update status label
-    status_var.set(f"LOADED: {os.path.basename(filename)}")
 
 # Function to display .prod table
 def display_prod_table(file_path):
@@ -113,14 +113,12 @@ def load_parse_table(file_path):
                 # Treat commas as delimiters in the CSV file
                 row = line.strip().split(',')
                 parse_table.append(row)
+        # Update status label
+        status_var.set(f"LOADED: '{os.path.basename(input_filename)}'")
         return parse_table
     except Exception as e:
         print(f"Error loading parse table: {e}")
         return None
-    
-    # Update status label
-    status_var.set(f"STATUS: Input file '{os.path.basename(filename)}' has been successfully loaded.")
-
     
 def display_parse_table(parse_table):
     if parse_table is not None:
