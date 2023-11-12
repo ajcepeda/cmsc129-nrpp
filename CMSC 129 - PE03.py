@@ -68,7 +68,7 @@ def select_file():
             parse_table = load_parse_table(filename)
             display_parse_table(parse_table)
 
-
+# Load .prod table
 def load_prod_table(file_path):
     prod_table = []
     try:
