@@ -149,8 +149,16 @@ def display_parse_table(parse_table):
 def list_to_string(list):
     return ' '.join(list)
 
+# clear frame 4 everytime parse button is clicked
+def clear_parse_results():
+    for item in frame4.winfo_children():
+        item.destroy()
+
 # Function to get user input from the text box
 def parsing_function():
+    # Clear previous parse results
+    clear_parse_results()
+
     # stacks for input and stack and parsed
     input = []
     stack = []
@@ -226,7 +234,6 @@ def parsing_function():
             flag = 1
             action = "match $"
             parsed.append(["", "", action])
-
 
     # Create a Treeview widget for parse information
     parse_tree = ttk.Treeview(frame4, columns=("Stack", "Input", "Action"), show="headings")
