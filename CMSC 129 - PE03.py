@@ -14,6 +14,7 @@ parser.configure(bg='#E6E6EA')
 # Variable initiation
 prod_table = None
 parse_table= None
+parsed = None
 frame1 = None
 frame2 = None
 frame3 = None
@@ -140,10 +141,135 @@ def display_parse_table(parse_table):
 
         tree.grid(padx=10, pady=10, sticky='w')
 
+def list_to_string(list):
+    return ' '.join(list)
+
+def reverse_string(string):
+    no_space = string.replace(" ","")
+    return no_space[::-1]
+
+
 # Function to get user input from the text box
 def parsing_function():
+    # stacks for input and stack
+    input = []
+    stack = []
+    parsed = []
+    action = ""
+
+    # place input in a list/stack, add $ at the end
     user_input = input_entry.get()
-    print(f"User Input: {user_input}")
+    input = user_input.strip().split(' ')
+    input.append('$')
+    
+    # 
+    for i in range(0, len(prod_table)):
+        if(prod_table[i][0]=='1'):
+            stack.append(prod_table[i][1])
+    stack.append('$')
+    
+
+    # stack check in terminal
+    # print(stack)
+    # print(input)
+    # print(f"User Input: {user_input}")
+    # print(prod_table)
+    # print(parse_table)
+    # parsed.append([list_to_string(stack), list_to_string(input), action])
+    # print(parsed)
+
+    # top_input = input[0]
+    # match top_input:
+    #     case 'id': top_input = 1
+    #     case '+': top_input = 2
+    #     case '*': top_input = 3
+    #     case '(': top_input = 4
+    #     case ')': top_input = 5
+    #     case '$': top_input = 6
+
+    # print(top_input)
+    
+    parsed.append([list_to_string(stack), list_to_string(input)])
+    flag = 0
+    while(flag == 0):
+
+        top_input = input[0]
+        match top_input:
+            case 'id':
+                top_input = 1
+            case '+':
+                top_input = 2
+            case '*':
+                top_input = 3
+            case '(':
+                top_input = 4
+            case ')':
+                top_input = 5
+            case '$':
+                top_input = 6
+
+        
+        if stack[0] == input[0]:
+            action = "match " + input[0]
+            stack.pop(0)
+            input.pop(0)
+            parsed.append([list_to_string(stack), list_to_string(input), action])
+        else:
+            for i in range(1, len(parse_table)):
+                print("Parse: " + parse_table[i][0])
+                print("Stack: " + stack[0])
+                if parse_table[i][0] == stack[0]:
+                    if parse_table[i][top_input] == '':
+                        action = "error"
+                        flag = 1
+                    else:
+                        current_prod = int(parse_table[i][top_input]) - 1
+                        action = "Output " + prod_table[current_prod][1] + " -> " + prod_table[current_prod][2]
+                        stack.pop(0)
+                        current_action = prod_table[current_prod][2].strip().split(' ')
+                        # print("Current Action: ")
+                        # print(current_action)
+                        current_action.reverse()
+                        for j in range(0, len(current_action)):
+                            if current_action[j] == 'e':
+                                break
+                            else:
+                                stack.insert(0, current_action[j])
+                        # print("Input stack: ")
+                        # print(input)
+                        # print("Stack stack: ")
+                        # print(stack)
+
+                        parsed.append([list_to_string(stack), list_to_string(input), action])
+
+        # if input[0] == '$':
+        #     flag = 1
+        if stack[0] == '$' and input[0] == '$':
+            flag = 1
+
+                        
+        # print(top_input)
+        # print("Input stack: ")
+        # print(input)
+        # print("Stack stack: ")
+        # print(stack)
+        # print(parsed)
+
+    # print(stack)
+    # print(input)
+    for row in parsed:
+        for col in row:
+            print(col, end=" | ") # print each element separated by space
+        print() # Add newline
+
+
+
+
+
+
+    
+    
+
 
 
 
