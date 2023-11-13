@@ -8,7 +8,7 @@ import os
 
 parser = tk.Tk()
 parser.title('Non-Recursive Predictive Parsing')
-parser.geometry('650x800')
+parser.geometry('650x850')
 parser.configure(bg='#E6E6EA')
 
 # Variable initiation
@@ -19,17 +19,27 @@ frame1 = None
 frame2 = None
 frame3 = None
 frame4 = None
+filename_label1 = None
+filename_label2 = None
 
 # Create a StringVar for the status label
 status_var = tk.StringVar()
 status_var.set("LOADED: No file loaded.")
 
+# Create a StringVar for the parsing status label
+parsing_status_var = tk.StringVar()
+parsing_status_var.set("PARSING: No input specified.")
+
 # Global variable to store the input filename
 input_filename = ""
 input_directory = ""
 
+# Global variables to store the base filenames
+prod_basenames = []
+ptbl_basenames = []
+
 def create_frames():
-    global frame1, frame2, frame3, frame4
+    global frame1, frame2, frame3, frame4, filename_label1, filename_label2
 
     frame1 = tk.Frame(parser, borderwidth=2, relief="solid")
     frame1.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
@@ -37,20 +47,27 @@ def create_frames():
     label1 = tk.Label(frame1, text="Productions", font=("Helvetica", 12))
     label1.grid(row=0, column=0, columnspan=2)
 
+    filename_label1 = tk.Label(frame1, text="", font=("Helvetica", 10))
+    filename_label1.grid(row=1, column=0, columnspan=2)
+
     frame2 = tk.Frame(parser, borderwidth=2, relief="solid")
     frame2.grid(row=0, column=1, padx=10, pady=10, sticky="nsew")
 
     label2 = tk.Label(frame2, text="Parse Table", font=("Helvetica", 12))
     label2.grid(row=0, column=0, columnspan=3)
 
+    filename_label2 = tk.Label(frame2, text="", font=("Helvetica", 10))
+    filename_label2.grid(row=1, column=0, columnspan=3)
+
     frame4 = tk.Frame(parser, borderwidth=2, relief="solid")
-    frame4.grid(row=5, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
+    frame4.grid(row=6, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
 
     label4 = tk.Label(frame4, text="Parsed", font=("Helvetica", 12))
     label4.grid(row=0, column=0, columnspan=3)
 
 def select_file():
-    global input_filename, input_directory, prod_table, parse_table
+    global input_filename, input_directory, prod_table, parse_table, filename_label1, filename_label2
+    global parsing_status_var, prod_basenames, ptbl_basenames
     error_count = 0  # Reset error_count to 0
     filetypes = (
         ('.prod files', '*.prod'),  
@@ -66,15 +83,27 @@ def select_file():
         if filename.endswith('.prod'):
             input_filename = filename
             input_directory = os.path.dirname(filename)
+
+            # Add the base name to the list
+            prod_basenames.append(os.path.splitext(os.path.basename(filename))[0])
+                                                                               
             # Load and display .prod table
             prod_table = load_prod_table(filename)
             display_prod_table(prod_table)
+            # Update filename label
+            filename_label1.config(text=f"{os.path.basename(filename)}")
         elif filename.endswith('.ptbl'):
             input_filename = filename
             input_directory = os.path.dirname(filename)
-            # Load and parse table
+
+            # Add the base name to the list
+            ptbl_basenames.append(os.path.splitext(os.path.basename(filename))[0])
+
+            # Load and display parse table
             parse_table = load_parse_table(filename)
             display_parse_table(parse_table)
+            # Update filename label
+            filename_label2.config(text=f"{os.path.basename(filename)}")
 
 # Load .prod table
 def load_prod_table(file_path):
@@ -86,7 +115,7 @@ def load_prod_table(file_path):
                 row = line.strip().split(',')
                 prod_table.append(row)
         # Update status label
-        status_var.set(f"LOADED: '{os.path.basename(input_filename)}'")
+        status_var.set(f"LOADED: {os.path.basename(input_filename)}")
         return prod_table
     except Exception as e:
         print(f"Error loading parse table: {e}")
@@ -119,7 +148,7 @@ def load_parse_table(file_path):
                 row = line.strip().split(',')
                 parse_table.append(row)
         # Update status label
-        status_var.set(f"LOADED: '{os.path.basename(input_filename)}'")
+        status_var.set(f"LOADED: {os.path.basename(input_filename)}")
         return parse_table
     except Exception as e:
         print(f"Error loading parse table: {e}")
@@ -156,6 +185,7 @@ def clear_parse_results():
 
 # Function to get user input from the text box
 def parsing_function():
+    global parsing_status_var, prod_basenames, ptbl_basenames
     # Clear previous parse results
     clear_parse_results()
 
@@ -170,6 +200,24 @@ def parsing_function():
     user_input = input_entry.get()
     input = user_input.strip().split(' ')
     input.append('$')
+
+    # Check if user input is not empty
+    if not user_input:
+        parsing_status_var.set("PARSING: Invalid. User input is empty.")
+        return
+
+    # Check if both .prod and .ptbl files are loaded
+    if not prod_basenames or not ptbl_basenames:
+        parsing_status_var.set("PARSING: Invalid. Both .prod and .ptbl files must be loaded.")
+    else:
+        # Check if the loaded .prod and .ptbl files are of the same base filename
+        if prod_basenames and ptbl_basenames and prod_basenames[-1] != ptbl_basenames[-1]:
+                # Display error message in parsing_status_var
+                parsing_status_var.set("PARSING: Invalid. Loaded files must have the same base filename.")
+                return
+        else:
+            # Update parsing status label
+            parsing_status_var.set(f"PARSING: Valid.")
     
     # initialization of stack
     for i in range(0, len(prod_table)):
@@ -256,12 +304,6 @@ def parsing_function():
 
 
 
-    
-    
-
-
-
-
 # Create a frame for user input elements
 user_input_frame = tk.Frame(frame3, borderwidth=2, relief="solid")
 user_input_frame.grid(row=4, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
@@ -290,11 +332,15 @@ button1.grid(row=3, column=0, padx=10   , pady=10, sticky="w")
 status_label = tk.Label(parser, textvariable=status_var, font=('Helvetica', 12))
 status_label.grid(row=2, column=0, columnspan=5, padx=20, pady=5, sticky="w")
 
+# Label for parsing status label
+status_label2 = tk.Label(parser, textvariable=parsing_status_var, font=('Helvetica', 12))
+status_label2.grid(row=5, column=0, columnspan=5, padx=20, pady=5, sticky="w")
+
 # Configure rows and columns to expand with the window
 parser.columnconfigure(0, weight=1)
 parser.columnconfigure(1, weight=20)
 parser.rowconfigure(0, weight=1)
-parser.rowconfigure(5, weight=1) 
+parser.rowconfigure(6, weight=1) 
 
 # Create frames and labels
 create_frames()
