@@ -8,7 +8,7 @@ import os
 
 parser = tk.Tk()
 parser.title('Non-Recursive Predictive Parsing')
-parser.geometry('650x850')
+parser.geometry('650x900')
 parser.configure(bg='#E6E6EA')
 
 # Variable initiation
@@ -19,6 +19,8 @@ frame1 = None
 frame2 = None
 frame3 = None
 frame4 = None
+label1 = None
+label2 = None
 filename_label1 = None
 filename_label2 = None
 
@@ -39,7 +41,7 @@ prod_basenames = []
 ptbl_basenames = []
 
 def create_frames():
-    global frame1, frame2, frame3, frame4, filename_label1, filename_label2
+    global frame1, frame2, frame3, frame4, filename_label1, filename_label2, label1, label2
 
     frame1 = tk.Frame(parser, borderwidth=2, relief="solid")
     frame1.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
@@ -66,7 +68,7 @@ def create_frames():
     label4.grid(row=0, column=0, columnspan=3)
 
 def select_file():
-    global input_filename, input_directory, prod_table, parse_table, filename_label1, filename_label2
+    global input_filename, input_directory, prod_table, parse_table, filename_label1, filename_label2, label1, label2
     global parsing_status_var, prod_basenames, ptbl_basenames
     error_count = 0  # Reset error_count to 0
     filetypes = (
@@ -84,6 +86,12 @@ def select_file():
             input_filename = filename
             input_directory = os.path.dirname(filename)
 
+            # Clear existing prod_table (except for filename_label1 and label1)
+            if prod_table is not None:
+                for widget in frame1.winfo_children():
+                    if widget not in [filename_label1, label1]:
+                        widget.destroy()
+
             # Add the base name to the list
             prod_basenames.append(os.path.splitext(os.path.basename(filename))[0])
                                                                                
@@ -95,6 +103,12 @@ def select_file():
         elif filename.endswith('.ptbl'):
             input_filename = filename
             input_directory = os.path.dirname(filename)
+
+            # Clear existing prod_table (except for filename_label2 and label2)
+            if prod_table is not None:
+                for widget in frame2.winfo_children():
+                    if widget not in [filename_label2, label2]:
+                        widget.destroy()
 
             # Add the base name to the list
             ptbl_basenames.append(os.path.splitext(os.path.basename(filename))[0])
@@ -312,8 +326,45 @@ def parsing_function():
     
     parse_tree.grid(padx=10, pady=10, sticky='w')
 
+    save_to_prsd(parsed)
 
+# Function to output .prsd file
+def save_to_prsd(parsed):
+    # Check if the parsed information is available
+    if parsed:
+        try:
+            # Use the .prod filename as the default filename
+            prod_filename = os.path.splitext(os.path.basename(input_filename))[0]
 
+            # Prompt the user for the desired .prsd filename
+            user_input_filename = fd.asksaveasfilename(
+                filetypes=[("Parsed Files", "*.prsd")],
+                title="Save Parsed Information",
+                initialdir=input_directory
+            )
+
+            # Check if the user canceled the file dialog
+            if not user_input_filename:
+                parsing_status_var.set("PARSING: Save operation canceled.")
+                return
+
+            # Append prod filename before saving
+            prsd_filename = f"{user_input_filename}_{prod_filename}.prsd"
+
+            # Open the file in write mode and save the parsed information
+            with open(prsd_filename, 'w') as prsd_file:
+                for row in parsed:
+                    prsd_file.write(','.join(row) + '\n')
+
+            # Update the status label
+            parsing_status_var.set(f"PARSING: Valid. Please see '{os.path.basename(prsd_filename)}'")
+        except Exception as e:
+            # Handle any errors that might occur during the saving process
+            print(f"Error saving parsed information: {e}")
+            status_var.set("PARSING: Failed to save parsed information.")
+    else:
+        # If parsed information is not available, update the status label
+        status_var.set("PARSING: No parsed information to save.")
 
 
 # Create a frame for user input elements
