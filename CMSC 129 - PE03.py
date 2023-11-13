@@ -8,7 +8,7 @@ import os
 
 parser = tk.Tk()
 parser.title('Non-Recursive Predictive Parsing')
-parser.geometry('650x400')
+parser.geometry('650x800')
 parser.configure(bg='#E6E6EA')
 
 # Variable initiation
@@ -18,6 +18,7 @@ parsed = None
 frame1 = None
 frame2 = None
 frame3 = None
+frame4 = None
 
 # Create a StringVar for the status label
 status_var = tk.StringVar()
@@ -28,7 +29,7 @@ input_filename = ""
 input_directory = ""
 
 def create_frames():
-    global frame1, frame2, frame3
+    global frame1, frame2, frame3, frame4
 
     frame1 = tk.Frame(parser, borderwidth=2, relief="solid")
     frame1.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
@@ -41,6 +42,12 @@ def create_frames():
 
     label2 = tk.Label(frame2, text="Parse Table", font=("Helvetica", 12))
     label2.grid(row=0, column=0, columnspan=3)
+
+    frame4 = tk.Frame(parser, borderwidth=2, relief="solid")
+    frame4.grid(row=5, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
+
+    label4 = tk.Label(frame4, text="Parsed", font=("Helvetica", 12))
+    label4.grid(row=0, column=0, columnspan=3)
 
 def select_file():
     global input_filename, input_directory, prod_table, parse_table
@@ -85,27 +92,24 @@ def load_prod_table(file_path):
         print(f"Error loading parse table: {e}")
         return None
 
-# Function to display .prod table
-def display_prod_table(file_path):
-    if prod_table is not None:
-        # # Create a frame inside the main window
-        # prod_frame = ttk.Frame(parser)
-        # prod_frame.grid(row=6, column=0, columnspan=2, padx=10, pady=10)
+# Function to display the product table inside frame1
+def display_prod_table(prod_table):
+    # Create a treeview widget
+    tree = ttk.Treeview(frame1, columns=(0, 1, 2), show="headings")
 
-        # Create a Treeview widget for .prod table
-        prod_tree = ttk.Treeview(frame1, columns=tuple(range(len(prod_table[0]))), show="headings")
+    # Add column headings
+    headers = ["ID", "NT", "P"]
+    for i, heading in enumerate(headers):
+        tree.heading(i, text=heading)
+        tree.column(i, width=50)  # Adjust the width as needed
 
-        # Use the first row from the .prod table as column headings
-        for i, heading_text in enumerate(prod_table[0]):
-            prod_tree.heading(i, text=heading_text)
-            prod_tree.column(i, width=50, anchor=tk.CENTER)
+    # Add data to the treeview
+    for row in prod_table:
+        tree.insert("", "end", values=row)
 
-        # Add data to the Treeview (excluding the first row)
-        for row in prod_table[1:]:
-            prod_tree.insert("", tk.END, values=tuple(row))
+    tree.grid(padx=10, pady=10, sticky='w')
 
-        prod_tree.grid(padx=10, pady=10, sticky='w')
-
+# Load .ptbl
 def load_parse_table(file_path):
     parse_table = []
     try:
@@ -263,6 +267,22 @@ def parsing_function():
             print(col, end=" | ") # print each element separated by space
         print() # Add newline
 
+    # Create a Treeview widget for parse information
+    parse_tree = ttk.Treeview(frame4, columns=("Stack", "Input", "Action"), show="headings")
+    parse_tree.heading("Stack", text="Stack")
+    parse_tree.heading("Input", text="Input")
+    parse_tree.heading("Action", text="Action")
+
+    # Right-align the contents of the "Stack" and "Input" column 
+    parse_tree.column("Stack", anchor=tk.E)
+    parse_tree.column("Input", anchor=tk.E)  
+    parse_tree.column("Action", anchor=tk.CENTER)  
+
+    # Add data to the Treeview
+    for row in parsed:
+        parse_tree.insert("", tk.END, values=row)
+    
+    parse_tree.grid(padx=10, pady=10, sticky='w')
 
 
 
@@ -295,12 +315,8 @@ input_button.grid(row=0, column=2, padx=10, pady=5, sticky="w")
 # Button for load file
 button1 = tk.Button(font=('Helvetica', 12), text='Load File', bd=1, relief='ridge',
                  fg='black', height=1, width=21, command=select_file)
-# Button for process
-# button2 = tk.Button(font=('times new roman', 12), text='Process', bd=1, relief='ridge',
-#                  fg='black', height=1, width=21, command="")
 
 button1.grid(row=3, column=0, padx=10   , pady=10, sticky="w")
-# button2.grid(row=4, column=0, padx=0, pady=10, sticky="e")
 
 # Label for status
 status_label = tk.Label(parser, textvariable=status_var, font=('Helvetica', 12))
@@ -310,6 +326,7 @@ status_label.grid(row=2, column=0, columnspan=5, padx=20, pady=5, sticky="w")
 parser.columnconfigure(0, weight=1)
 parser.columnconfigure(1, weight=20)
 parser.rowconfigure(0, weight=1)
+parser.rowconfigure(5, weight=1) 
 
 # Create frames and labels
 create_frames()
