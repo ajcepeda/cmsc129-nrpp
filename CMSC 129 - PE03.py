@@ -141,9 +141,11 @@ def display_parse_table(parse_table):
         tree.grid(padx=10, pady=10, sticky='w')
 
 # Function to get user input from the text box
-def get_user_input():
+def parsing_function():
     user_input = input_entry.get()
     print(f"User Input: {user_input}")
+
+
 
 # Create a frame for user input elements
 user_input_frame = tk.Frame(frame3, borderwidth=2, relief="solid")
@@ -159,7 +161,7 @@ input_entry.grid(row=0, column=1, padx=10, pady=5, sticky="w")
 
 # Create a button to get user input
 input_button = tk.Button(user_input_frame, text="Parse", font=('Helvetica', 12),
-                         command=get_user_input)
+                         command=parsing_function)
 input_button.grid(row=0, column=2, padx=10, pady=5, sticky="w")
 
 
