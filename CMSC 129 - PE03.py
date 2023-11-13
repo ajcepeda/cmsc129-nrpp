@@ -205,6 +205,12 @@ def parsing_function():
     if not user_input:
         parsing_status_var.set("PARSING: Invalid. User input is empty.")
         return
+    
+    # Check if user input contains only valid symbols
+    valid_symbols = {'id', '+', '*', '(', ')', '$'}
+    if any(symbol not in valid_symbols for symbol in user_input.split()):
+        parsing_status_var.set("PARSING: Invalid. User input contains invalid symbols.")
+        return
 
     # Check if both .prod and .ptbl files are loaded
     if not prod_basenames or not ptbl_basenames:
@@ -249,7 +255,7 @@ def parsing_function():
 
         # case when match found in stack and input buffer
         if stack[0] == input[0]:
-            action = "match " + input[0]
+            action = "Match " + input[0]
             stack.pop(0)
             input.pop(0)
             parsed.append([list_to_string(stack), list_to_string(input), action])
@@ -282,6 +288,12 @@ def parsing_function():
             flag = 1
             action = "match $"
             parsed.append(["", "", action])
+
+    # Check if an "error" occurred in the last action
+    if parsed[-1][2] == "error":
+        parsing_status_var.set("PARSING: Invalid. An error occurred during parsing.")
+    else:
+        parsing_status_var.set("PARSING: Valid.")
 
     # Create a Treeview widget for parse information
     parse_tree = ttk.Treeview(frame4, columns=("Stack", "Input", "Action"), show="headings")
