@@ -221,6 +221,7 @@ def parsing_function():
                 if parse_table[i][0] == stack[0]:
                     if parse_table[i][top_input] == '':
                         action = "error"
+                        parsed.append([list_to_string(stack), list_to_string(input), action])
                         flag = 1
                     else:
                         current_prod = int(parse_table[i][top_input]) - 1
