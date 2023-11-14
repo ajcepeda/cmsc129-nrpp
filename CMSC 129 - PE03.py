@@ -279,7 +279,7 @@ def parsing_function():
                 if parse_table[i][0] == stack[0]:
                     # error if top of stack not found in parse table
                     if parse_table[i][top_input] == '':
-                        action = "error"
+                        action = "Error"
                         parsed.append([list_to_string(stack), list_to_string(input), action])
                         flag = 1
                     # if found, top is popped and replaced with the matching production
@@ -296,11 +296,12 @@ def parsing_function():
                                 stack.insert(0, current_action[j])
 
                         parsed.append([list_to_string(stack), list_to_string(input), action])
+        print(parsed)
 
         # success case
         if stack[0] == '$' and input[0] == '$':
             flag = 1
-            action = "match $"
+            action = "Match $"
             parsed.append(["", "", action])
 
     # Check if an "error" occurred in the last action
