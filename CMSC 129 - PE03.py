@@ -125,8 +125,9 @@ def load_prod_table(file_path):
     try:
         with open(file_path, 'r') as file:
             for line in file:
-                # Treat commas as delimiters in the CSV file
+                # replace curly with straight quotes
                 line.replace("’","\'")
+                # Treat commas as delimiters in the CSV file
                 row = line.strip().split(',')
                 prod_table.append(row)
         # Update status label
@@ -159,6 +160,8 @@ def load_parse_table(file_path):
     try:
         with open(file_path, 'r') as file:
             for line in file:
+                # replace curly with straight quotes
+                line.replace("’","\'")
                 # Treat commas as delimiters in the CSV file
                 row = line.strip().split(',')
                 parse_table.append(row)
