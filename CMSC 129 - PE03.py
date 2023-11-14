@@ -126,6 +126,7 @@ def load_prod_table(file_path):
         with open(file_path, 'r') as file:
             for line in file:
                 # Treat commas as delimiters in the CSV file
+                line.replace("’","\'")
                 row = line.strip().split(',')
                 prod_table.append(row)
         # Update status label
