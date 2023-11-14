@@ -360,7 +360,7 @@ def save_to_prsd(parsed):
                     prsd_file.write(','.join(row) + '\n')
 
             # Update the status label
-            if parsed[-1][2] == "error":
+            if parsed[-1][2] == "Error":
                 parsing_status_var.set(f"PARSING: Invalid. Please see '{os.path.basename(prsd_filename)}'")
             else:
                 parsing_status_var.set(f"PARSING: Valid. Please see '{os.path.basename(prsd_filename)}'")
