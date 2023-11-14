@@ -123,10 +123,10 @@ def select_file():
 def load_prod_table(file_path):
     prod_table = []
     try:
-        with open(file_path, 'r') as file:
+        with open(file_path, 'r', encoding='utf-8') as file:
             for line in file:
                 # replace curly with straight quotes
-                line.replace("’","\'")
+                line = line.replace("’","'")
                 # Treat commas as delimiters in the CSV file
                 row = line.strip().split(',')
                 prod_table.append(row)
@@ -158,10 +158,10 @@ def display_prod_table(prod_table):
 def load_parse_table(file_path):
     parse_table = []
     try:
-        with open(file_path, 'r') as file:
+        with open(file_path, 'r', encoding='utf-8') as file:
             for line in file:
                 # replace curly with straight quotes
-                line.replace("’","\'")
+                line = line.replace("’","'")
                 # Treat commas as delimiters in the CSV file
                 row = line.strip().split(',')
                 parse_table.append(row)
@@ -224,21 +224,15 @@ def parsing_function():
         parsing_status_var.set("PARSING: Invalid. User input is empty.")
         return
     
-    # Check if user input contains only valid symbols
-    valid_symbols = {'id', '+', '*', '(', ')', '$'}
-    if any(symbol not in valid_symbols for symbol in user_input.split()):
-        parsing_status_var.set("PARSING: Invalid. User input contains invalid symbols.")
-        return
-
     # Check if both .prod and .ptbl files are loaded
     if not prod_basenames or not ptbl_basenames:
         parsing_status_var.set("PARSING: Invalid. Both .prod and .ptbl files must be loaded.")
     else:
         # Check if the loaded .prod and .ptbl files are of the same base filename
         if prod_basenames and ptbl_basenames and prod_basenames[-1] != ptbl_basenames[-1]:
-                # Display error message in parsing_status_var
-                parsing_status_var.set("PARSING: Invalid. Loaded files must have the same base filename.")
-                return
+            # Display error message in parsing_status_var
+            parsing_status_var.set("PARSING: Invalid. Loaded files must have the same base filename.")
+            return
         else:
             # Update parsing status label
             parsing_status_var.set(f"PARSING: Valid.")
@@ -249,12 +243,10 @@ def parsing_function():
             stack.append(prod_table[i][1])
     stack.append('$')
     
-
     # main parsing function
     parsed.append([list_to_string(stack), list_to_string(input)])
     flag = 0
     while(flag == 0):
-
         # assign an int for each terminal
         top_input = input[0]
         match top_input:
@@ -300,7 +292,12 @@ def parsing_function():
                                 stack.insert(0, current_action[j])
 
                         parsed.append([list_to_string(stack), list_to_string(input), action])
-        print(parsed)
+                        break  # Break the loop after finding a matching production
+            else:
+                # If no matching production is found, handle the invalid symbol
+                action = "Error"
+                parsed.append([list_to_string(stack), list_to_string(input), action])
+                flag = 1  # Set flag to exit the loop
 
         # success case
         if stack[0] == '$' and input[0] == '$':
@@ -309,7 +306,7 @@ def parsing_function():
             parsed.append(["", "", action])
 
     # Check if an "error" occurred in the last action
-    if parsed[-1][2] == "error":
+    if parsed[-1][2] == "Error":
         parsing_status_var.set("PARSING: Invalid. An error occurred during parsing.")
     else:
         parsing_status_var.set("PARSING: Valid.")
@@ -332,6 +329,7 @@ def parsing_function():
     parse_tree.grid(padx=10, pady=10, sticky='w')
 
     save_to_prsd(parsed)
+
 
 # Function to output .prsd file
 def save_to_prsd(parsed):
@@ -362,7 +360,11 @@ def save_to_prsd(parsed):
                     prsd_file.write(','.join(row) + '\n')
 
             # Update the status label
-            parsing_status_var.set(f"PARSING: Valid. Please see '{os.path.basename(prsd_filename)}'")
+            if parsed[-1][2] == "error":
+                parsing_status_var.set(f"PARSING: Invalid. Please see '{os.path.basename(prsd_filename)}'")
+            else:
+                parsing_status_var.set(f"PARSING: Valid. Please see '{os.path.basename(prsd_filename)}'")
+
         except Exception as e:
             # Handle any errors that might occur during the saving process
             print(f"Error saving parsed information: {e}")
